@@ -2,6 +2,12 @@ import streamlit as st
 from rag.retriever import get_retriever
 from rag.prompt import PROMPT
 from rag.llm import llm
+import os
+from ingest.build_vectorstore import build_index  # your function
+
+if not os.path.exists("vectorstore/index.faiss"):
+    build_index()
+
 
 st.set_page_config(page_title="IQRA University Chatbot", page_icon="🎓")
 
