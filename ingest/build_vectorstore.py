@@ -1,22 +1,21 @@
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.vectorstores import FAISS
+# ingest/build_vectorstore.py
+
+from langchain.vectorstores import FAISS
 from rag.embeddings import embedding_model
 from ingest.load_pdfs import load_pdfs
 from ingest.load_website import load_website
+import os
 
-def build_vectorstore():
-    docs = []
-    docs.extend(load_pdfs("data/pdfs"))
-    docs.extend(load_website("https://iqra.edu.pk/"))
+VECTOR_DIR = "vectorstore"
 
-    splitter = RecursiveCharacterTextSplitter(
-        chunk_size=500,
-        chunk_overlap=100
-    )
-    chunks = splitter.split_documents(docs)
-
-    db = FAISS.from_documents(chunks, embedding_model)
-    db.save_local("vectorstore")
-
-if __name__ == "__main__":
-    build_vectorstore()
+def build_index():
+    # Load all documents from PDFs and website
+    docs = load_pdfs("data/pdfs") + load_website("https://www.iqra.edu.pk/")
+    
+    # Build FAISS index
+    if not os.path.exists(VECTOR_DIR):
+        os.makedirs(VECTOR_DIR)
+        
+    db = FAISS.from_documents(docs, embedding_model)
+    db.save_local(VECTOR_DIR)
+    print("FAISS index built successfully")
